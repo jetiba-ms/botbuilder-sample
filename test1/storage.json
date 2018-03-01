@@ -1,0 +1,38 @@
+﻿[
+  {
+    "key": "InfoPiani/tua600",
+    "text": "queste sono le info di entity=tua600"
+  },
+  {
+    "key": "InfoPiani/creamirevolution1",
+    "text": "queste sono le info di entity=creamirevolution1"
+  },
+  {
+    "key": "InfoPiani/creamigiga",
+    "text": "queste sono le info di entity=creamigiga"
+  },
+  {
+    "key": "InfoPiani/generic",
+    "text": "queste sono le informazioni generali sui piani (no entity)"
+  },
+  {
+    "key": "Utilizzo/voce",
+    "text": "queste sono le info per chi usa molto le opzioni VOCE"
+  },
+  {
+    "key": "Utilizzo/sms",
+    "text": "queste sono le info per chi usa molto le opzioni SMS"
+  },
+  {
+    "key": "Utilizzo/dati",
+    "text": "queste sono le info per chi usa molto le opzioni DATI"
+  },
+  {
+    "key": "suggestion",
+    "text": "se abbiamo uno score basso diamo delle indicazioni su come usare il bot"
+  },
+  {
+    "key": "none",
+    "text": "se finiamo nell'intent none, questa è la risposta"
+  }
+]
