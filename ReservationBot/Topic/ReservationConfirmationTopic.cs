@@ -4,6 +4,7 @@ using Microsoft.Bot.Builder;
 using Microsoft.Bot.Schema;
 using PromptlyBot;
 using System.Text;
+using PromptlyBot.Prompts;
 
 namespace Microsoft.Bot.Samples
 {
@@ -26,10 +27,10 @@ namespace Microsoft.Bot.Samples
                     .OnPrompt((context, lastTurnReason) =>
                     {
                         var recapactivity = ReservationView.ReservationRecapCard(context, reservation);
-                        context.Reply(recapactivity);
+                        context.SendActivity(recapactivity);
 
                         var activity = ReservationView.CreatedYesNoCard();
-                        context.Reply(activity);
+                        context.SendActivity(activity);
                     })
                     .Validator(new ReservationConfirmationValidator())
                     .MaxTurns(2)
@@ -37,14 +38,14 @@ namespace Microsoft.Bot.Samples
                     {
                         this.ClearActiveTopic();
                         this.State.confirmation.confirmationState = value;
-                        this.OnReceiveActivity(context);
+                        this.OnTurn(context);
                     })
                     .OnFailure((context, reason) =>
                     {
                         this.ClearActiveTopic();
                         if (reason != null && reason == "toomanyattemps")
                         {
-                            context.Reply("I'm sorry I'm having issues understanding you.");
+                            context.SendActivity("I'm sorry I'm having issues understanding you.");
                         }
                         this.OnFailure(context, reason);
                     });
@@ -52,17 +53,17 @@ namespace Microsoft.Bot.Samples
             });
         }
 
-        public override Task OnReceiveActivity(IBotContext context)
+        public override Task OnTurn(ITurnContext context)
         {
             if (HasActiveTopic)
             {
-                ActiveTopic.OnReceiveActivity(context);
+                ActiveTopic.OnTurn(context);
                 return Task.CompletedTask;
             }
             if(State.confirmation.confirmationState == null)
             {
                 this.SetActiveTopic(CONFIRMATION_PROMPT);
-                this.ActiveTopic.OnReceiveActivity(context);
+                this.ActiveTopic.OnTurn(context);
                 return Task.CompletedTask;
             }
 

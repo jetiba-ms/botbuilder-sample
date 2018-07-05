@@ -3,22 +3,29 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Schema;
+using Microsoft.Bot.Builder.Core.Extensions;
 using PromptlyBot;
+using Microsoft.Bot.Samples;
 
-namespace Microsoft.Bot.Samples
+namespace ReservationBot
 {
-    internal class RootTopic : TopicsRoot
+    public class RootTopicState : ConversationTopicState
+    {
+
+    }
+
+    internal class RootTopic : TopicsRoot<BotConversationState, RootTopicState>
     {
         private const string ADD_RESERVATION_TOPIC = "addReservationTopic";
         private const string DELETE_RESERVATION_TOPIC = "deleteReservationTopic";
 
         private const string USER_STATE_RESERVATION = "Reservations";
 
-        public RootTopic(IBotContext context) : base(context)
+        public RootTopic(ITurnContext context) : base(context)
         {
-            if (context.State.UserProperties[USER_STATE_RESERVATION] == null)
+            if (context.GetUserState<BotUserState>().Reservations == null)
             {
-                context.State.UserProperties[USER_STATE_RESERVATION] = new List<Reservation>();
+                context.GetUserState<BotUserState>().Reservations = new List<Reservation>();
             }
 
             this.SubTopics.Add(ADD_RESERVATION_TOPIC, (object[] args) =>
@@ -31,19 +38,19 @@ namespace Microsoft.Bot.Samples
                     this.ClearActiveTopic();
                     if(reservation.Confirmed == "yes")
                     {
-                        ((List<Reservation>)ctx.State.UserProperties[USER_STATE_RESERVATION]).Add(reservation);
-                        context.Reply($"Reservation added!");
+                        ctx.GetUserState<BotUserState>().Reservations.Add(reservation);
+                        context.SendActivity($"Reservation added!");
                     }
                     else
                     {
-                        context.Reply("you deleted the reservation");
+                        context.SendActivity("you deleted the reservation");
                     }
                     
                 })
                 .OnFailure((ctx, reason) =>
                 {
                     this.ClearActiveTopic();
-                    context.Reply("It fails for some reasons");
+                    context.SendActivity("It fails for some reasons");
                     this.ShowDefaultMessage(context);
                 });
 
@@ -52,16 +59,16 @@ namespace Microsoft.Bot.Samples
             });               
         }
 
-        private void ShowDefaultMessage(IBotContext context)
+        private void ShowDefaultMessage(ITurnContext context)
         {
-            context.Reply("write Reservation to start with a new reservation");
+            context.SendActivity("write 'add reservation' to start with a new reservation");
         }
 
-        public override Task OnReceiveActivity(IBotContext context)
+        public override Task OnTurn(ITurnContext context)
         {
-            if ((context.Request.Type == ActivityTypes.Message) && (context.Request.AsMessageActivity().Text.Length > 0))
+            if ((context.Activity.Type == ActivityTypes.Message) && (context.Activity.AsMessageActivity().Text.Length > 0))
             {
-                var message = context.Request.AsMessageActivity();
+                var message = context.Activity.AsMessageActivity();
                 
                 //I can use LUIS here!
 
@@ -70,7 +77,7 @@ namespace Microsoft.Bot.Samples
                 {
                     // Set the active topic and let the active topic handle this turn.
                     this.SetActiveTopic(ADD_RESERVATION_TOPIC)
-                            .OnReceiveActivity(context);
+                            .OnTurn(context);
                     return Task.CompletedTask;
                 }
 
@@ -86,7 +93,7 @@ namespace Microsoft.Bot.Samples
                 {
                     this.ClearActiveTopic();
 
-                    ReservationView.ShowReservations(context, context.State.UserProperties[USER_STATE_RESERVATION]);
+                    ReservationView.ShowReservations(context, context.GetUserState<BotUserState>().Reservations);
                     return Task.CompletedTask;
                 }
 
@@ -101,7 +108,7 @@ namespace Microsoft.Bot.Samples
                 // If there is an active topic, let it handle this turn until it completes.
                 if (HasActiveTopic)
                 {
-                    ActiveTopic.OnReceiveActivity(context);
+                    ActiveTopic.OnTurn(context);
                     return Task.CompletedTask;
                 }
 
@@ -111,7 +118,7 @@ namespace Microsoft.Bot.Samples
             return Task.CompletedTask;
         }
 
-        private void ShowHelp(IBotContext context)
+        private void ShowHelp(ITurnContext context)
         {
             var message = "Here's what I can do:\n\n";
             message += "To see your alarms, say 'Show Reservations'.\n\n";
@@ -119,7 +126,7 @@ namespace Microsoft.Bot.Samples
             message += "To delete an alarm, say 'Delete Reservations'.\n\n";
             message += "To see this again, say 'Help'.";
 
-            context.Reply(message);
+            context.SendActivity(message);
         }
     }
 }

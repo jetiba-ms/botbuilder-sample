@@ -7,6 +7,7 @@ using PromptlyBot.Validator;
 using System.Collections.Generic;
 using Microsoft.Bot.Builder.Ai;
 using Microsoft.Bot.Schema;
+using PromptlyBot.Prompts;
 
 namespace Microsoft.Bot.Samples
 {
@@ -35,11 +36,10 @@ namespace Microsoft.Bot.Samples
                     {
                         if (lastTurnReason != null && lastTurnReason == "novaliddatetime")
                         {
-                            context.Reply("insert a valid date")
-                                .Reply("Let's try again!");
+                            context.SendActivity("insert a valid date");
                         }
 
-                        context.Reply("What's your check in date?");
+                        context.SendActivity("What's your check in date?");
                     })
                     .Validator(new ReservationStartDateValidator())
                     .MaxTurns(2)
@@ -47,14 +47,14 @@ namespace Microsoft.Bot.Samples
                     {
                         this.ClearActiveTopic();
                         this.State.reservation.StartDay = value;
-                        this.OnReceiveActivity(context);
+                        this.OnTurn(context);
                     })
                     .OnFailure((context, reason) =>
                     {
                         this.ClearActiveTopic();
                         if (reason != null && reason == "toomanyattemps")
                         {
-                            context.Reply("I'm sorry I'm having issues understanding you.");
+                            context.SendActivity("I'm sorry I'm having issues understanding you.");
                         }
                         this.OnFailure(context, reason);
                     });
@@ -68,7 +68,7 @@ namespace Microsoft.Bot.Samples
                 locationPrompt.Set
                     .OnPrompt((context, lastTurnReason) =>
                     {
-                        context.Reply("Where you want to go?");
+                        context.SendActivity("Where you want to go?");
                     })
                     .Validator(new ReservationLocationValidator())
                     .MaxTurns(2)
@@ -76,14 +76,14 @@ namespace Microsoft.Bot.Samples
                     {
                         this.ClearActiveTopic();
                         this.State.reservation.Location = value;
-                        this.OnReceiveActivity(context);
+                        this.OnTurn(context);
                     })
                     .OnFailure((context, reason) =>
                     {
                         this.ClearActiveTopic();
                         if (reason != null && reason == "toomanyattemps")
                         {
-                            context.Reply("I'm sorry I'm having issues understanding you.");
+                            context.SendActivity("I'm sorry I'm having issues understanding you.");
                         }
                         this.OnFailure(context, reason);
                     });
@@ -97,7 +97,7 @@ namespace Microsoft.Bot.Samples
                 peoplenumberPrompt.Set
                     .OnPrompt((context, lastTurnReason) =>
                     {
-                        context.Reply("How many people?");
+                        context.SendActivity("How many people?");
                     })
                     .Validator(new ReservationNumberValidator())
                     .MaxTurns(2)
@@ -105,14 +105,14 @@ namespace Microsoft.Bot.Samples
                     {
                         this.ClearActiveTopic();
                         this.State.reservation.PeopleNumber = value;
-                        this.OnReceiveActivity(context);
+                        this.OnTurn(context);
                     })
                     .OnFailure((context, reason) =>
                     {
                         this.ClearActiveTopic();
                         if (reason != null && reason == "toomanyattemps")
                         {
-                            context.Reply("I'm sorry I'm having issues understanding you.");
+                            context.SendActivity("I'm sorry I'm having issues understanding you.");
                         }
                         this.OnFailure(context, reason);
                     });
@@ -126,7 +126,7 @@ namespace Microsoft.Bot.Samples
                 durationPrompt.Set
                     .OnPrompt((context, lastTurnReason) =>
                     {
-                        context.Reply("How many days do you want to stay?");
+                        context.SendActivity("How many days do you want to stay?");
                     })
                     .Validator(new ReservationNumberValidator())
                     .MaxTurns(2)
@@ -134,14 +134,14 @@ namespace Microsoft.Bot.Samples
                     {
                         this.ClearActiveTopic();
                         this.State.reservation.Duration = value;
-                        this.OnReceiveActivity(context);
+                        this.OnTurn(context);
                     })
                     .OnFailure((context, reason) =>
                     {
                         this.ClearActiveTopic();
                         if (reason != null && reason == "toomanyattemps")
                         {
-                            context.Reply("I'm sorry I'm having issues understanding you.");
+                            context.SendActivity("I'm sorry I'm having issues understanding you.");
                         }
                         this.OnFailure(context, reason);
                     });
@@ -159,13 +159,13 @@ namespace Microsoft.Bot.Samples
                    {
                        this.ClearActiveTopic();
                        this.State.reservation.Confirmed = "yes";
-                       this.OnReceiveActivity(ctx);
+                       this.OnTurn(ctx);
                    }
                    else
                    {
                        this.ClearActiveTopic();
                        this.State.reservation.Confirmed = "no";
-                       this.OnReceiveActivity(ctx);
+                       this.OnTurn(ctx);
                    }
 
                })
@@ -174,7 +174,7 @@ namespace Microsoft.Bot.Samples
                    this.ClearActiveTopic();
                    if (reason != null && reason == "toomanyattemps")
                    {
-                       context.Reply("I'm sorry I'm having issues understanding you.");
+                       context.SendActivity("I'm sorry I'm having issues understanding you.");
                    }
                    this.OnFailure(context, reason);
                });
@@ -198,7 +198,7 @@ namespace Microsoft.Bot.Samples
 
                        var activity = ReservationView.CreateEditReservationHeroCard(actions);
                         // Send the activity as a reply to the user.
-                        context.Reply(activity);
+                        context.SendActivity(activity);
                     })
                     .Validator(new ReservationEditValidator())
                     .MaxTurns(2)
@@ -226,14 +226,14 @@ namespace Microsoft.Bot.Samples
                             default:
                                 break;
                         }
-                        this.OnReceiveActivity(context);
+                        this.OnTurn(context);
                     })
                     .OnFailure((context, reason) =>
                     {
                         this.ClearActiveTopic();
                         if (reason != null && reason == "toomanyattemps")
                         {
-                            context.Reply("I'm sorry I'm having issues understanding you.");
+                            context.SendActivity("I'm sorry I'm having issues understanding you.");
                         }
                         this.OnFailure(context, reason);
                     });
@@ -241,44 +241,44 @@ namespace Microsoft.Bot.Samples
             });
         }
 
-        public override Task OnReceiveActivity(IBotContext context)
+        public override Task OnTurn(ITurnContext context)
         {
             if (HasActiveTopic)
             {
-                ActiveTopic.OnReceiveActivity(context);
+                ActiveTopic.OnTurn(context);
                 return Task.CompletedTask;
             }
 
             if (this.State.reservation.StartDay == default)
             {
                 this.SetActiveTopic(STARTDATE_PROMPT);
-                this.ActiveTopic.OnReceiveActivity(context);
+                this.ActiveTopic.OnTurn(context);
                 return Task.CompletedTask;
             }
 
             if (this.State.reservation.Location == null)
             {
                 this.SetActiveTopic(LOCATION_PROMPT);
-                this.ActiveTopic.OnReceiveActivity(context);
+                this.ActiveTopic.OnTurn(context);
                 return Task.CompletedTask;
             }
 
             if (this.State.reservation.PeopleNumber == 0)
             {
                 this.SetActiveTopic(PEOPLENUMBER_PROMPT);
-                this.ActiveTopic.OnReceiveActivity(context);
+                this.ActiveTopic.OnTurn(context);
                 return Task.CompletedTask;
             }
             if (this.State.reservation.Duration == 0)
             {
                 this.SetActiveTopic(DURATION_PROMPT);
-                this.ActiveTopic.OnReceiveActivity(context);
+                this.ActiveTopic.OnTurn(context);
                 return Task.CompletedTask;
             }
             if (this.State.reservation.Confirmed == null)
             {
                 this.SetActiveTopic(CONFIRMATION_PROMPT);
-                this.ActiveTopic.OnReceiveActivity(context);
+                this.ActiveTopic.OnTurn(context);
                 return Task.CompletedTask;
             }
             else
@@ -286,7 +286,7 @@ namespace Microsoft.Bot.Samples
                 if (State.reservation.Confirmed == "no")
                 {
                     this.SetActiveTopic(EDIT_PROMPT);
-                    this.ActiveTopic.OnReceiveActivity(context);
+                    this.ActiveTopic.OnTurn(context);
                     return Task.CompletedTask;
                 }
             }
@@ -299,51 +299,51 @@ namespace Microsoft.Bot.Samples
 
     internal class ReservationEditValidator : Validator<string>
     {
-        public override ValidatorResult<string> Validate(IBotContext context)
+        public override ValidatorResult<string> Validate(ITurnContext context)
         {
             return new ValidatorResult<string>
             {
-                Value = context.Request.AsMessageActivity().Text
+                Value = context.Activity.AsMessageActivity().Text
             };
         }
     }
 
     internal class ReservationConfirmationValidator : Validator<string>
     {
-        public override ValidatorResult<string> Validate(IBotContext context)
+        public override ValidatorResult<string> Validate(ITurnContext context)
         {
             return new ValidatorResult<string>
             {
-                Value = context.Request.AsMessageActivity().Text
+                Value = context.Activity.AsMessageActivity().Text
             };
         }
     }
 
     internal class ReservationNumberValidator : Validator<int>
     {
-        public override ValidatorResult<int> Validate(IBotContext context)
+        public override ValidatorResult<int> Validate(ITurnContext context)
         {
             return new ValidatorResult<int>
             {
-                Value = Int32.Parse(context.Request.AsMessageActivity().Text)
+                Value = Int32.Parse(context.Activity.AsMessageActivity().Text)
             };
         }
     }
 
     internal class ReservationLocationValidator : Validator<string>
     {
-        public override ValidatorResult<string> Validate(IBotContext context)
+        public override ValidatorResult<string> Validate(ITurnContext context)
         {
             return new ValidatorResult<string>
             {
-                Value = context.Request.AsMessageActivity().Text
+                Value = context.Activity.AsMessageActivity().Text
             };
         }
     }
 
     public class ReservationStartDateValidator : Validator<DateTime>
     {
-        public override ValidatorResult<DateTime> Validate(IBotContext context)
+        public override ValidatorResult<DateTime> Validate(ITurnContext context)
         {
             var reco = DateTimeRecognizerExtension.GetDateTimes(context);
             if (reco.isValid)

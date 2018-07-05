@@ -17,12 +17,12 @@ namespace ReservationBot.Extensions
 
     public static class DateTimeRecognizerExtension
     {
-        public static TimeValues GetDateTimes(this IBotContext context)
+        public static TimeValues GetDateTimes(this ITurnContext context)
         {
             //IList<DateTime> times = new List<DateTime>();
             // Get DateTime model for English
-            var model = DateTimeRecognizer.GetInstance().GetDateTimeModel(context.Request.AsMessageActivity().Locale ?? "en-us");
-            var results = model.Parse(context.Request.AsMessageActivity().Text);
+            var model = DateTimeRecognizer.GetInstance().GetDateTimeModel(context.Activity.AsMessageActivity().Locale ?? "en-us");
+            var results = model.Parse(context.Activity.AsMessageActivity().Text);
 
             // Check there are valid results
             if (results.Any() && results.First().TypeName.StartsWith("datetimeV2"))

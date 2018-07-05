@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2024
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReservationBot", "test1\ReservationBot.csproj", "{BB5F31E5-8DAE-436E-ACCB-81D74ABB1452}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReservationBot", "ReservationBot\ReservationBot.csproj", "{BB5F31E5-8DAE-436E-ACCB-81D74ABB1452}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

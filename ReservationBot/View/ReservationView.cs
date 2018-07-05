@@ -1,5 +1,6 @@
 ﻿using AdaptiveCards;
 using Microsoft.Bot.Builder;
+using Microsoft.Bot.Builder.Core.Extensions;
 using Microsoft.Bot.Schema;
 using System.Collections.Generic;
 using System.Globalization;
@@ -8,18 +9,18 @@ namespace Microsoft.Bot.Samples
 {
     public class ReservationView
     {
-        public static void ShowReservations(IBotContext context, List<Reservation> reservations)
+        public static void ShowReservations(ITurnContext context, List<Reservation> reservations)
         {
             if ((reservations == null) || (reservations.Count == 0))
             {
-                context.Reply("You have no reservations.");
+                context.SendActivity("You have no reservations.");
                 return;
             }
 
             IMessageActivity activity;
             if (reservations.Count == 1)
             {
-                activity = ((Activity)context.Request).CreateReply();
+                activity = context.Activity.CreateReply();
                 var card = new AdaptiveCard();
                 var factset = new AdaptiveFactSet();
                 factset.Facts.Add(new AdaptiveFact("Start Date", reservations[0].StartDay.ToString("dd/MM/yyyy")));
@@ -31,7 +32,7 @@ namespace Microsoft.Bot.Samples
                 card.Body.Add(factset);
 
                 activity.Attachments.Add(new Attachment(AdaptiveCard.ContentType, content: card));
-                context.Reply(activity);
+                context.SendActivity(activity);
                 return;
             }
 
@@ -55,12 +56,12 @@ namespace Microsoft.Bot.Samples
             }
              activity = MessageFactory.Carousel(attachments);
 
-            context.Reply(activity);
+            context.SendActivity(activity);
         }
 
-        public static IMessageActivity ReservationRecapCard(IBotContext context, Reservation reservation)
+        public static IMessageActivity ReservationRecapCard(ITurnContext context, Reservation reservation)
         {
-            IMessageActivity activity = ((Activity)context.Request).CreateReply();
+            IMessageActivity activity = context.Activity.CreateReply();
             var card = new AdaptiveCard();
             var factset = new AdaptiveFactSet();
             factset.Facts.Add(new AdaptiveFact("Start Date", reservation.StartDay.ToString("dd/MM/yyyy")));
