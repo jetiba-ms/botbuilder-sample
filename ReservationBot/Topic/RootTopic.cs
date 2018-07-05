@@ -121,10 +121,9 @@ namespace ReservationBot
         private void ShowHelp(ITurnContext context)
         {
             var message = "Here's what I can do:\n\n";
-            message += "To see your alarms, say 'Show Reservations'.\n\n";
-            message += "To add an alarm, say 'Add Reservations'.\n\n";
-            message += "To delete an alarm, say 'Delete Reservations'.\n\n";
-            message += "To see this again, say 'Help'.";
+            message += "To add a reservation, say 'add reservations'.\n\n";
+            message += "To see your reservation, say 'show reservations'.\n\n";
+            message += "To see this again, say 'help'.";
 
             context.SendActivity(message);
         }
